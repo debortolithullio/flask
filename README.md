@@ -14,4 +14,4 @@ The basic code will be based on **Miguel Grinberg's tutorial** (https://blog.mig
 
 ![alt text](http://www.yarntomato.com/percentbarmaker/button.php?barPosition=0&leftFill=%2399CC00)
 
-On this folder will be contained an application in Flask to do an object detection with a pre-trained model.
+In this folder will be contained an application in Flask to do an object detection with a pre-trained model.

@@ -8,7 +8,7 @@ Creating a Flask application
 
 ![alt text](http://www.yarntomato.com/percentbarmaker/button.php?barPosition=0&leftFill=%2399CC00)
 
-The basic code will be based on **Miguel Grinberg's tutorial** (https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world). On that, I will create a simple application with Flask.
+The basic code will be based on **Miguel Grinberg's tutorial** (https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world).
 
 ## YOLO-Flask
 

@@ -10,6 +10,11 @@
    <link rel="stylesheet" href="{{url_for('.static', filename='my_style.css')}}">
 {% endblock %}
 
+{% block scripts %}
+   <script src="{{url_for('.static', filename='Chart.min.js')}}"></script>
+   {{super()}}
+{% endblock %}
+
 {% set navigation_bar = [
    ('index', 'Home'),
    ('earnings_and_expenses', 'Earnings & Expenses'),

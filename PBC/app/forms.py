@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, FileField, SubmitField, validators
+from wtforms import StringField, BooleanField, FileField, SubmitField, validators, RadioField
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms.fields.html5 import DateField
 from wtforms.validators import ValidationError, DataRequired
@@ -7,6 +7,11 @@ from wtforms_components import DateRange
 from datetime import datetime, date
 
 class UploadForm(FlaskForm):
+   origin = RadioField('Origin', validators=[DataRequired()])
+   file_upload = FileField("File", validators=[FileRequired(), FileAllowed(['csv'], 'CSV files only!')])
+   submit1 = SubmitField("Submit")
+
+class UploadFormInvestments(FlaskForm):
    file_upload = FileField("File", validators=[FileRequired(), FileAllowed(['csv'], 'CSV files only!')])
    submit1 = SubmitField("Submit")
 

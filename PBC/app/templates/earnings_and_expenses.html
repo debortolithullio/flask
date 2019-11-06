@@ -17,5 +17,143 @@
             {{ wtf.quick_form(form_date, form_type = 'inline') }}
          </div>
       </div>
+      <!-- bar chart canvas element -->
+      <canvas id="canvas_general" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
+      <canvas id="canvas_stack_earnings" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
+      <canvas id="canvas_stack_expenses" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
    </div>
+
+   <script>
+         function getRandomColor() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+               color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+         }
+
+         var barChartData_general = {
+            labels: [{% for item in views['general_labels'] %}
+                        "{{item}}",
+                     {% endfor %}],
+            datasets: [{
+               label: "{{views['general_label1']}}",
+               backgroundColor: "rgba(75,192,192,0.5)",
+               borderColor: "rgba(75,192,192,1)",
+               borderWidth: 1,
+               data: [{% for item in views['general_data1'] %}
+                        {{item}},
+                     {% endfor %}]
+            }, {
+               label: "{{views['general_label2']}}",
+               backgroundColor: "rgba(192,75,75,0.5)",
+               borderColor: "rgba(192,75,75,1)",
+               borderWidth: 1,
+               data: [{% for item in views['general_data2'] %}
+                        {{item}},
+                     {% endfor %}]
+            }]
+         };
+
+         var barChartData_stack_earnings = {
+            labels: [{% for item in views['stack_labels'] %}
+                        "{{item}}",
+                     {% endfor %}],
+            datasets: [{% for cat in views["stack-earnings"].keys() %}
+                           {
+                              label: "{{cat}}",
+                              backgroundColor: getRandomColor(),
+                              data: [{% for item in views['stack-earnings'][cat]['data1'] %}
+                                       {{item}},
+                                    {% endfor %}]
+                           },
+                     {% endfor %}]
+         };
+
+         var barChartData_stack_expenses = {
+            labels: [{% for item in views['stack_labels'] %}
+                        "{{item}}",
+                     {% endfor %}],
+            datasets: [{% for cat in views["stack-expenses"].keys() %}
+                           {
+                              label: "{{cat}}",
+                              backgroundColor: getRandomColor(),
+                              data: [{% for item in views['stack-expenses'][cat]['data2'] %}
+                                       {{item}},
+                                    {% endfor %}]
+                           },
+                     {% endfor %}]
+         };
+   
+         window.onload = function() {
+            var ctx = document.getElementById('canvas_general').getContext('2d');
+            window.myBar = new Chart(ctx, {
+               type: 'bar',
+               data: barChartData_general,
+               options: {
+                  responsive: true,
+                  legend: {
+                     position: 'top',
+                  },
+                  title: {
+                     display: true,
+                     text: 'General'
+                  }
+               }
+            });
+   
+            var ctx2 = document.getElementById('canvas_stack_earnings').getContext('2d');
+            window.myBar2 = new Chart(ctx2, {
+               type: 'bar',
+               data: barChartData_stack_earnings,
+               options: {
+                  title: {
+                     display: true,
+                     text: 'Earnings - Stacked by Category'
+                  },
+                  tooltips: {
+                     mode: 'index',
+                     intersect: false
+                  },
+                  responsive: true,
+                  scales: {
+                     xAxes: [{
+                        stacked: true,
+                     }],
+                     yAxes: [{
+                        stacked: true
+                     }]
+                  }
+               }
+            });
+
+            var ctx3 = document.getElementById('canvas_stack_expenses').getContext('2d');
+            window.myBar3 = new Chart(ctx3, {
+               type: 'bar',
+               data: barChartData_stack_expenses,
+               options: {
+                  title: {
+                     display: true,
+                     text: 'Expenses - Stacked by Category'
+                  },
+                  tooltips: {
+                     mode: 'index',
+                     intersect: false
+                  },
+                  responsive: true,
+                  scales: {
+                     xAxes: [{
+                        stacked: true,
+                     }],
+                     yAxes: [{
+                        stacked: true
+                     }]
+                  }
+               }
+            });
+         };
+      </script>
 {% endblock %}
+
+

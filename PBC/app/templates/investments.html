@@ -12,5 +12,10 @@
             {{ wtf.quick_form(form) }}
          </div>
       </div>
+      <div class="row">
+         <div class='col-sm-12'>
+            {{ wtf.quick_form(form_date, form_type = 'inline') }}
+         </div>
+      </div>
    </div>
 {% endblock %}

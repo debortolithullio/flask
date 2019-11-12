@@ -30,10 +30,10 @@ def create_items(df, origin):
                   mtype = row['mtype']) for index, row in df.iterrows()]
 
 def get_views_earnings_and_expenses(df):
-   df['grp_date'] = df['date'].apply(lambda x: x.strftime('%B-%Y'))
+   df['grp_date'] = df['date'].apply(lambda x: x.strftime('%Y-%m'))
 
    if df['grp_date'].nunique() <= 2:
-      df['grp_date'] = df['date'].apply(lambda x: x.strftime('%d-%m-%Y'))
+      df['grp_date'] = df['date'].apply(lambda x: x.strftime('%Y-%m-%d'))
 
    group_df = df.groupby(by=['grp_date', 'category', 'mtype']).sum().reset_index()[['grp_date', 'category', 'mtype', 'amount']]
    general_df = df.groupby(by=['grp_date', 'mtype']).sum().reset_index()[['grp_date', 'mtype', 'amount']].sort_values(by=['grp_date'])
@@ -66,5 +66,30 @@ def get_views_earnings_and_expenses(df):
       if sum(merge_df['amount_y'])>0:
          views["stack-expenses"][cat] = {}
          views["stack-expenses"][cat]['data2'] = list(merge_df['amount_y'])
+
+   return views 
+
+def get_views_investment(df):
+   df['grp_date'] = df['date'].apply(lambda x: x.strftime('%Y-%m'))
+   df.drop_duplicates(subset=['grp_date', 'category', 'title'], keep='last', inplace = True)
+
+   group_df = df.groupby(by=['grp_date', 'category']).sum().reset_index()[['grp_date', 'category', 'net_amount']].sort_values(by=['grp_date'])
+   general_df = df.groupby(by=['grp_date', 'title']).sum().reset_index()[['grp_date', 'title', 'net_amount']].sort_values(by=['grp_date'])
+   
+   views = {}
+
+   views['general_labels'] = list(general_df['grp_date'].unique())
+   views['category_labels'] = list(group_df['grp_date'].unique())
+   views["general"] = {}
+   views["category"] = {}
+   for title in list(general_df.title.unique()):
+      aux_df = pd.merge(pd.DataFrame(general_df['grp_date'].unique(), columns=["grp_date"]), general_df[general_df.title == title], how = 'outer', left_on = 'grp_date', right_on = 'grp_date').fillna(0)
+      views["general"][title] = {}
+      views["general"][title]['data'] = list(aux_df['net_amount'])
+
+   for category in list(group_df.category.unique()):
+      aux_df = pd.merge(pd.DataFrame(group_df['grp_date'].unique(), columns=["grp_date"]), group_df[group_df.category == category], how = 'outer', left_on = 'grp_date', right_on = 'grp_date').fillna(0)
+      views["category"][category] = {}
+      views["category"][category]['data'] = list(aux_df['net_amount'])
 
    return views 

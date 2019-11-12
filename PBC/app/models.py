@@ -10,4 +10,22 @@ class Item(db.Model):
     amount = db.Column(db.Float)
 
     def __repr__(self):
-        return '<Item {}/{} - {}>'.format(self.category, self.title, str(self.amount))
+        return '<Item {}/{} - ${}>'.format(self.category, self.title, str(self.amount))
+
+class Investment(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(140), index=True, unique=True)
+    category = db.Column(db.String(140), index=True)
+
+    def __repr__(self):
+        return '<Investment {}/{}>'.format(self.title, self.category)
+
+class Position(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    investment = db.Column(db.Integer, db.ForeignKey('investment.id'))
+    date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    net_amount = db.Column(db.Float)
+    gross_amount = db.Column(db.Float)
+
+    def __repr__(self):
+        return '<Investment {}/{} - Net: ${}>'.format(str(self.investment), str(self.date), str(self.net_amount))

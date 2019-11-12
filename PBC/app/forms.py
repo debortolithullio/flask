@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, FileField, SubmitField, validators, RadioField
+from wtforms import StringField, BooleanField, FileField, SubmitField, validators, RadioField, SelectField, FloatField
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms.fields.html5 import DateField
 from wtforms.validators import ValidationError, DataRequired
@@ -12,13 +12,23 @@ class UploadForm(FlaskForm):
    submit1 = SubmitField("Submit")
 
 class UploadFormInvestments(FlaskForm):
-   file_upload = FileField("File", validators=[FileRequired(), FileAllowed(['csv'], 'CSV files only!')])
-   submit1 = SubmitField("Submit")
+   investment = SelectField("Investment", validators=[DataRequired()], coerce=int)
+   date = DateField('Position date', validators=[DataRequired()])
+   gross_amount = FloatField('Gross amount', validators=[DataRequired()])
+   net_amount = FloatField('Net amount', validators=[DataRequired()])
+   submit1 = SubmitField("Insert")
+
+class NewInvestmentForm(FlaskForm):
+   category = SelectField("Category", 
+                           choices = [('Renda Fixa', 'Renda Fixa'), ('FII', 'FII'), ('Fundos', 'Fundos')], 
+                           validators=[DataRequired()])
+   title = StringField('Title', validators=[DataRequired()])
+   submit3 = SubmitField("Create")
 
 class DatesForm(FlaskForm):
-   initial_date = DateField('Initial Date', id='datepickinit', validators=[DataRequired()])
-   end_date = DateField('End Date', id='datepickend', validators=[DataRequired()])
-   submit2 = SubmitField("Update Views")
+   initial_date = DateField('Initial date', id='datepickinit', validators=[DataRequired()])
+   end_date = DateField('End date', id='datepickend', validators=[DataRequired()])
+   submit2 = SubmitField("Update views")
 
    def __init__(self, original_initial_date, original_end_date, *args, **kwargs):
       super(DatesForm, self).__init__(*args, **kwargs)

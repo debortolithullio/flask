@@ -7,3 +7,9 @@
    width: auto;
    position: inherit;
 }
+
+.form-inline .form-control {
+    display: inline-block;
+    width: 12em;
+    vertical-align: middle;
+}

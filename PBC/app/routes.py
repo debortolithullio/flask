@@ -1,17 +1,38 @@
 from app import app
 from flask import render_template, flash, redirect, url_for, session, request
 from flask_login import current_user, login_user, logout_user, login_required
-from app.forms import UploadForm, DatesForm, UploadFormInvestments, NewInvestmentForm
+from app.forms import UploadForm, DatesForm, UploadFormInvestments, NewInvestmentForm, YearDashboard, GoalForm
 from datetime import datetime, date
-from app.models import Item, Investment, Position
+from app.models import Item, Investment, Position, InvestmentGoal
 import pandas as pd
 from app.utils import *
 from app import db
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-   return render_template('index.html', active_page = 'index')
+   if "year_dashboard" not in session:
+      last_investment = Position.query.order_by(Position.date.desc()).first()
+      session["year_dashboard"] = last_investment.date.strftime("%Y")
+
+   form = YearDashboard()
+   form.year.choices = [(str(year), str(year)) for year in range(date.today().year-4, date.today().year+1)]
+
+   if form.validate_on_submit():
+      session["year_dashboard"] = form.year.data
+
+   form.year.data = session["year_dashboard"]
+   
+   try:
+      views = get_views_dashboard(session["year_dashboard"], ['investimento'])
+      views['goal'] = InvestmentGoal.query.filter(InvestmentGoal.year == int(session["year_dashboard"])).first()
+
+   except:
+      flash("Missing data for the selected year. The investment and earning & expenses data has to be available")
+      views = None
+
+   
+   return render_template('index.html', active_page = 'index', form=form, views = views)
 
 @app.route('/investments', methods=['GET', 'POST'])
 def investments():
@@ -35,6 +56,19 @@ def investments():
       flash('New position inserted!')
       return redirect(url_for('investments'))
 
+   goalForm = GoalForm()
+   if goalForm.submit.data and goalForm.validate():
+      new_goal= InvestmentGoal(amount=goalForm.amount.data, year=date.today().year)
+      db.session.add(new_goal)
+      db.session.commit()
+
+      flash('New investment goal set!')
+      return redirect(url_for('investments'))
+
+   goal = InvestmentGoal.query.filter(InvestmentGoal.year == date.today().year).first()
+   if goal:
+      goalForm = None   
+
    #Using session to store the dates used from the last 
    if "init_date_inv" not in session:
       session["init_date_inv"] = date.today().replace(day=1, month=1).strftime("%d%m%Y")
@@ -50,15 +84,19 @@ def investments():
       form_date.initial_date.data = datetime.strptime(session["init_date_inv"], "%d%m%Y").date()
       form_date.end_date.data = datetime.strptime(session["end_date_inv"], "%d%m%Y").date()
 
-   positions_df = pd.read_sql(Position.query.filter((Position.date >= datetime.strptime(session["init_date_inv"], "%d%m%Y")) & (Position.date <= datetime.strptime(session["end_date_inv"], "%d%m%Y"))).statement, db.session.bind) 
-   investments_df = pd.read_sql(Investment.query.statement, db.session.bind) 
-   investments_df = pd.merge(positions_df, investments_df, how = 'left', left_on = 'investment', right_on = 'id')
-   views = get_views_investment(investments_df)
+   try:
+      positions_df = pd.read_sql(Position.query.filter((Position.date >= datetime.strptime(session["init_date_inv"], "%d%m%Y")) & (Position.date <= datetime.strptime(session["end_date_inv"], "%d%m%Y"))).statement, db.session.bind) 
+      investments_df = pd.read_sql(Investment.query.statement, db.session.bind) 
+      investments_df = pd.merge(positions_df, investments_df, how = 'left', left_on = 'investment', right_on = 'id')
+      views = get_views_investment(investments_df)
+   except:
+      views = None
 
    return render_template('investments.html', 
                            new_inv_form=new_inv_form, 
                            form=form, 
                            form_date=form_date, 
+                           goalForm=goalForm,
                            active_page = 'investments',
                            views = views)
 
@@ -92,10 +130,12 @@ def earnings_and_expenses():
       form_date.initial_date.data = datetime.strptime(session["init_date_ee"], "%d%m%Y").date()
       form_date.end_date.data = datetime.strptime(session["end_date_ee"], "%d%m%Y").date()
 
-   #items = Item.query.filter((Item.date >= datetime.strptime(session["init_date_ee"], "%d%m%Y")) & (Item.date <= datetime.strptime(session["end_date_ee"], "%d%m%Y"))).all()
-   items_df = pd.read_sql(Item.query.filter((Item.date >= datetime.strptime(session["init_date_ee"], "%d%m%Y")) & (Item.date <= datetime.strptime(session["end_date_ee"], "%d%m%Y"))).statement, db.session.bind) 
+   try:
+      items_df = pd.read_sql(Item.query.filter((Item.date >= datetime.strptime(session["init_date_ee"], "%d%m%Y")) & (Item.date <= datetime.strptime(session["end_date_ee"], "%d%m%Y"))).statement, db.session.bind) 
 
-   views = get_views_earnings_and_expenses(items_df)
+      views = get_views_earnings_and_expenses(items_df)
+   except:
+      views = None
 
    return render_template('earnings_and_expenses.html', 
                            form=form, 

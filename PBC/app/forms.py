@@ -11,6 +11,14 @@ class UploadForm(FlaskForm):
    file_upload = FileField("File", validators=[FileRequired(), FileAllowed(['csv'], 'CSV files only!')])
    submit1 = SubmitField("Submit")
 
+class YearDashboard(FlaskForm):
+   year = SelectField('Year', validators=[DataRequired()])
+   submit = SubmitField("Update")
+
+class GoalForm(FlaskForm):
+   amount = FloatField('Amount', validators=[DataRequired()])
+   submit = SubmitField("Set Goal")
+
 class UploadFormInvestments(FlaskForm):
    investment = SelectField("Investment", validators=[DataRequired()], coerce=int)
    date = DateField('Position date', validators=[DataRequired()])

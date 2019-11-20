@@ -13,3 +13,11 @@
     width: 12em;
     vertical-align: middle;
 }
+
+.float-left {
+    float: left !important;
+}
+
+.float-right {
+    float: right !important;
+}

@@ -18,11 +18,13 @@
          </div>
       </div>
       <!-- bar chart canvas element -->
+      
       <canvas id="canvas_general" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
       <canvas id="canvas_stack_earnings" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
       <canvas id="canvas_stack_expenses" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
+      
    </div>
-
+   {% if views %}
    <script>
          function getRandomColor() {
             var letters = '0123456789ABCDEF'.split('');
@@ -154,6 +156,7 @@
             });
          };
       </script>
+      {% endif %}
 {% endblock %}
 
 

@@ -7,7 +7,13 @@
       <div class="panel panel-primary">
          <div class="panel-heading">
             <h3 class="panel-title">Insert new data</h3>
-         </div>
+			</div>
+			{% if goalForm %}
+			<div class="panel-body">
+				<h4 style="margin: 0 0 10px 0;">Set your investment goal for this year</h4>
+				{{ wtf.quick_form(goalForm, form_type = 'inline') }}
+			</div>
+			{% endif %}
          <div class="panel-body">
             <h4 style="margin: 0 0 10px 0;">New investment</h4>
             {{ wtf.quick_form(new_inv_form, form_type = 'inline') }}
@@ -22,11 +28,13 @@
             {{ wtf.quick_form(form_date, form_type = 'inline') }}
          </div>
       </div>
-      <!-- bar chart canvas element -->
+		<!-- bar chart canvas element -->
+		
       <canvas id="canvas_category" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
-      <canvas id="canvas_general" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
+		<canvas id="canvas_general" style="display: block; height: 534px; width: 1068px;" width="2136" height="1068" class="chartjs-render-monitor"></canvas>
+		
    </div>
-
+	{% if views %}
    <script>
       function getRandomColor() {
          var letters = '0123456789ABCDEF'.split('');
@@ -146,4 +154,5 @@
 		};
 
    </script>
+	{% endif %}
 {% endblock %}

@@ -1,6 +1,8 @@
 from app.models import Item
 import pandas as pd
 from datetime import datetime, date
+from app.models import Item, Investment, Position
+from app import db
 
 def create_items(df, origin):
    '''
@@ -93,3 +95,46 @@ def get_views_investment(df):
       views["category"][category]['data'] = list(aux_df['net_amount'])
 
    return views 
+
+def get_views_dashboard(year, categories_to_ignore=None):
+   init_date = datetime.strptime('0101'+year, "%d%m%Y").date()
+   end_date = datetime.strptime('3112'+year, "%d%m%Y").date()
+
+   #get data
+   positions_df = pd.read_sql(Position.query.filter((Position.date >= init_date) & (Position.date <= end_date)).statement, db.session.bind) 
+   df_investment = pd.read_sql(Investment.query.statement, db.session.bind) 
+   df_investment = pd.merge(positions_df, df_investment, how = 'left', left_on = 'investment', right_on = 'id')
+   df_earnings_and_expenses = pd.read_sql(Item.query.filter((Item.date >= init_date) & (Item.date <= end_date)).statement, db.session.bind) 
+
+   #group
+   df_investment['grp_date'] = df_investment['date'].apply(lambda x: x.strftime('%Y-%m'))
+   df_investment.drop_duplicates(subset=['grp_date', 'category', 'title'], keep='last', inplace = True)
+   df_investment = df_investment.groupby(by=['grp_date']).sum().reset_index()[['grp_date', 'gross_amount', 'net_amount']].sort_values(by=['grp_date'])
+
+   df_earnings_and_expenses['grp_date'] = df_earnings_and_expenses['date'].apply(lambda x: x.strftime('%Y-%m'))
+   if categories_to_ignore:
+      df_earnings_and_expenses = df_earnings_and_expenses[~df_earnings_and_expenses.category.isin(categories_to_ignore)]
+   df_earnings_and_expenses = df_earnings_and_expenses.groupby(by=['grp_date', 'mtype']).sum().reset_index()[['grp_date', 'mtype', 'amount']].sort_values(by=['grp_date'])
+   df_earnings_and_expenses = pd.merge(df_earnings_and_expenses[df_earnings_and_expenses.mtype == "earning"], df_earnings_and_expenses[df_earnings_and_expenses.mtype == "expense"], how = 'outer', left_on = 'grp_date', right_on = 'grp_date').fillna(0).sort_values(by=['grp_date'])
+
+
+   views = {}
+   # Investment informations
+   views['year_variation_percentage'] = float("{0:.2f}".format(((df_investment['net_amount'].iloc[-1]/df_investment['net_amount'].iloc[0])-1)*100))
+   views['year_total_amount'] = float("{0:.2f}".format(df_investment['net_amount'].iloc[-1]))
+   views['inv_chart_labels'] = list(df_investment['grp_date'].unique())
+   views['inv_chart_label1'] = "Net amount"
+   views['inv_chart_label2'] = "Gross amount"
+   views['inv_chart_data1'] = list(df_investment['net_amount'])
+   views['inv_chart_data2'] = list(df_investment['gross_amount'])
+
+   # Earnings and expenses informations
+   views['year_earnings'] = float("{0:.2f}".format(sum(list(df_earnings_and_expenses['amount_x']))))
+   views['year_expenses'] = float("{0:.2f}".format(sum(list(df_earnings_and_expenses['amount_y']))))
+   views['ee_chart_labels'] = list(df_earnings_and_expenses['grp_date'].unique())
+   views['ee_chart_label1'] = "Earnings"
+   views['ee_chart_label2'] = "Expenses"
+   views['ee_chart_data1'] = list(df_earnings_and_expenses['amount_x'])
+   views['ee_chart_data2'] = list(df_earnings_and_expenses['amount_y'])
+
+   return views

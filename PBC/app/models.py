@@ -29,3 +29,11 @@ class Position(db.Model):
 
     def __repr__(self):
         return '<Investment {}/{} - Net: ${}>'.format(str(self.investment), str(self.date), str(self.net_amount))
+
+class InvestmentGoal(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    year = db.Column(db.Integer, index=True, unique=True)
+    amount = db.Column(db.Float)
+
+    def __repr__(self):
+        return '<Goal {} - Amount: ${}>'.format(str(self.year), str(self.amount))

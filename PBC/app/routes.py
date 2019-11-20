@@ -24,7 +24,7 @@ def index():
    form.year.data = session["year_dashboard"]
    
    try:
-      views = get_views_dashboard(session["year_dashboard"], ['investimento'])
+      views = get_views_dashboard(session["year_dashboard"])#, ['investimento'])
       views['goal'] = InvestmentGoal.query.filter(InvestmentGoal.year == int(session["year_dashboard"])).first()
 
    except:

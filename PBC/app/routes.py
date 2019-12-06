@@ -24,8 +24,8 @@ def index():
    form.year.data = session["year_dashboard"]
    
    try:
-      views = get_views_dashboard(session["year_dashboard"])#, ['investimento'])
-      views['goal'] = InvestmentGoal.query.filter(InvestmentGoal.year == int(session["year_dashboard"])).first()
+      views = get_views_dashboard(session["year_dashboard"], ['investimento'])
+      views['goal'] = InvestmentGoal.query.filter(InvestmentGoal.year == int(session["year_dashboard"])).first().amount
 
    except:
       flash("Missing data for the selected year. The investment and earning & expenses data has to be available")

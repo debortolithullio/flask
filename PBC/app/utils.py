@@ -97,14 +97,14 @@ def get_views_investment(df):
    return views 
 
 def get_views_dashboard(year, categories_to_ignore=None):
-   init_date = datetime.strptime('0101'+year, "%d%m%Y").date()
-   end_date = datetime.strptime('3112'+year, "%d%m%Y").date()
+   init_date = datetime.strptime('3112'+str(int(year)-1), "%d%m%Y").date()
+   end_date = datetime.strptime('0101'+str(int(year)+1), "%d%m%Y").date()
 
    #get data
-   positions_df = pd.read_sql(Position.query.filter((Position.date >= init_date) & (Position.date <= end_date)).statement, db.session.bind) 
+   positions_df = pd.read_sql(Position.query.filter((Position.date > init_date) & (Position.date < end_date)).statement, db.session.bind) 
    df_investment = pd.read_sql(Investment.query.statement, db.session.bind) 
    df_investment = pd.merge(positions_df, df_investment, how = 'left', left_on = 'investment', right_on = 'id')
-   df_earnings_and_expenses = pd.read_sql(Item.query.filter((Item.date >= init_date) & (Item.date <= end_date)).statement, db.session.bind) 
+   df_earnings_and_expenses = pd.read_sql(Item.query.filter((Item.date > init_date) & (Item.date < end_date)).statement, db.session.bind) 
 
    #group
    df_investment['grp_date'] = df_investment['date'].apply(lambda x: x.strftime('%Y-%m'))
